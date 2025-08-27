@@ -12,12 +12,14 @@ async def main():
                 all_headers = request.headers
                 client_integrity = all_headers.get("client-integrity")
                 client_version = all_headers.get("client-version")
-                if client_integrity and client_version and not headers_found.done():
+                device_id = all_headers.get("x-device-id")
+                if client_integrity and client_version and device_id and not headers_found.done():
                     print("\n✓ УСПЕХ! Необходимые заголовки перехвачены!")
                     print("Теперь вы можете закрыть и браузер, и этот скрипт (Ctrl+C).")
                     headers_found.set_result({
                         "Client-Integrity": client_integrity,
-                        "Client-Version": client_version
+                        "Client-Version": client_version,
+                        "X-Device-Id": device_id
                     })
             await route.continue_()
         except Exception:
