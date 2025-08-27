@@ -349,10 +349,45 @@ class AccountWorker:
         self._watching_task: Optional[asyncio.Task] = None
         self._is_running = True
 
-        # Новые заголовки из браузера для psdpz51
-        self._client_integrity = "v4.local.4rejmKjJ_-EtgqfsXh_FT0_uEanjHTcoWKE03YSm6H61wCkvOf1k2EQQG4bk0eKqonDffB5EWtOiskwm7usXnfI8y1vtShS_kjJ7udNMEkobYKCuH7N8MZ_ol56t7fAU5BsBFF6HXHJAJL9J7bhUoC3OtOgXOihe7xAvp4JbEUNMIeBc1BKrBr3ulN5j3dciBN6ZeIpX5iZt2wtYJ8_HZp2yMp6byk61xno5voUGnH7jgfoa60xYVh9eDKZtsltLp9g1DFNEbCEvNT_Fef-VCtpXXR3zk-TrTugWyOTZ7bR9N-UwTOGWgPan6Rj6UqLCbNHW3SvV2TxdFijnDQv9aUT7hOe4jgvaswDdxa5c4BD0AYKjQhoUPo2pUPoh4bj8Chd1ohZfTV4UZF2it_iFxKdb6gHoro-xufvBP6L4_JLjO_T-oAHXohspyOI1eJ-BJDa4XmZNFUX9"
-        self._client_version = "77c65ca2-e514-47a4-93ce-f02d45685216"
-        self._device_id = "HfUYGIW1fsmut5ROvSr3BRKpcp1EO4DQ"
+        # Читаем значения заголовков из конфигурационных файлов
+        headers_cfg = {}
+
+        # Значения могут быть заданы в accounts.json для конкретного аккаунта
+        self._client_integrity = (
+            account_config.get("Client-Integrity")
+            or account_config.get("client_integrity")
+            or account_config.get("client-integrity")
+        )
+        self._client_version = (
+            account_config.get("Client-Version")
+            or account_config.get("client_version")
+            or account_config.get("client-version")
+        )
+        self._device_id = (
+            account_config.get("X-Device-Id")
+            or account_config.get("x_device_id")
+            or account_config.get("x-device-id")
+        )
+
+        # Если в accounts.json их нет, пробуем headers.json
+        if not all([self._client_integrity, self._client_version, self._device_id]):
+            try:
+                with open("headers.json", "r", encoding="utf-8") as f:
+                    headers_cfg = json.load(f)
+            except FileNotFoundError:
+                headers_cfg = {}
+
+            self._client_integrity = self._client_integrity or headers_cfg.get("Client-Integrity")
+            self._client_version = self._client_version or headers_cfg.get("Client-Version")
+            self._device_id = self._device_id or headers_cfg.get("X-Device-Id")
+
+        # Сообщаем пользователю об отсутствующих заголовках
+        if not self._client_integrity:
+            logging.warning(f"[{self.username}] Client-Integrity не найден в headers.json или accounts.json")
+        if not self._client_version:
+            logging.warning(f"[{self.username}] Client-Version не найден в headers.json или accounts.json")
+        if not self._device_id:
+            logging.warning(f"[{self.username}] X-Device-Id не найден в headers.json или accounts.json")
 
     def log(self, message: str): 
         logging.info(f"[{self.username}] {message}")
@@ -379,12 +414,13 @@ class AccountWorker:
             jar.update_cookies({"auth-token": self.config["auth_token"]}, URL("https://www.twitch.tv"))
         
         # Добавляем дополнительные заголовки из браузера
-        headers = {
-            "User-Agent": self._client_type.USER_AGENT,
-            "Client-Integrity": self._client_integrity,
-            "Client-Version": self._client_version,
-            "X-Device-Id": self._device_id
-        }
+        headers = {"User-Agent": self._client_type.USER_AGENT}
+        if self._client_integrity:
+            headers["Client-Integrity"] = self._client_integrity
+        if self._client_version:
+            headers["Client-Version"] = self._client_version
+        if self._device_id:
+            headers["X-Device-Id"] = self._device_id
         
         self._session = aiohttp.ClientSession(
             cookie_jar=jar, 
