@@ -235,7 +235,7 @@ class Channel:
         # Попробуем несколько паттернов
         patterns = [
             r'"spade_?url":\s*"([^"]+)"',
-            r'https://video-edge-[^\s"<>]+\.ts(?:\?[^\s"<>"]+)?'
+            r'(https://video-edge-[^\s"<>]+\.ts(?:\?[^\s"<>"]+)?)'
         ]
         
         for pattern in patterns:
