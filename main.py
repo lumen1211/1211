@@ -20,6 +20,10 @@ logging.basicConfig(
     ]
 )
 
+async def async_input(prompt: str) -> str:
+    """Асинхронный ввод с помощью отдельного потока."""
+    return await asyncio.to_thread(input, prompt)
+
 async def interactive_mode(worker: AccountWorker):
     """Интерактивный режим выбора кампании и канала."""
     print("\n--- Интерактивный режим ---")
@@ -46,7 +50,7 @@ async def interactive_mode(worker: AccountWorker):
 
     # 3. Выбрать кампанию
     try:
-        choice = int(input(f"\nВыберите кампанию (1-{len(campaigns)}): ")) - 1
+        choice = int(await async_input(f"\nВыберите кампанию (1-{len(campaigns)}): ")) - 1
         if not 0 <= choice < len(campaigns):
             print("Неверный выбор.")
             return
@@ -73,7 +77,7 @@ async def interactive_mode(worker: AccountWorker):
 
     # 6. Выбрать канал
     try:
-        choice = int(input(f"\nВыберите канал (1-{len(channels_list)}): ")) - 1
+        choice = int(await async_input(f"\nВыберите канал (1-{len(channels_list)}): ")) - 1
         if not 0 <= choice < len(channels_list):
             print("Неверный выбор.")
             return
@@ -126,8 +130,8 @@ async def main():
         # Инициализируем сессию
         await worker._initialize_session()
         print(f"Аккаунт авторизован. User ID: {worker.user_id}")
-        
-        # Запускаем интерактивный режим
+
+        # Запускаем интерактивный режим (ввод выполняется в отдельном потоке)
         await interactive_mode(worker)
         
     except Exception as e:
