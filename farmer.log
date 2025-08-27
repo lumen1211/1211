@@ -1,0 +1,26 @@
+2025-08-27 11:37:45 - INFO     - [psdpz51] Инициализация сессии...
+2025-08-27 11:37:45 - INFO     - [psdpz51] Auth token не найден, попытка получить user_id через GQL...
+2025-08-27 11:37:45 - INFO     - [psdpz51] Отправка GQL запроса: {'operationName': 'Current_user', 'extensions': {'persistedQuery': {'version': 1, 'sha256Hash': '22e284f362ef59b240357db9227f2532755771fc9c16972074d7b9e681c404d7'}}}
+2025-08-27 11:37:45 - INFO     - [psdpz51] Отправка POST запроса к https://gql.twitch.tv/gql с kwargs: {'json': {'operationName': 'Current_user', 'extensions': {'persistedQuery': {'version': 1, 'sha256Hash': '22e284f362ef59b240357db9227f2532755771fc9c16972074d7b9e681c404d7'}}}, 'headers': {'Client-Id': 'kimne78kx3ncx6brgo4mv6wki5h1ko'}}
+2025-08-27 11:37:45 - INFO     - [psdpz51] Ответ от https://gql.twitch.tv/gql: статус 200
+2025-08-27 11:37:45 - INFO     - [psdpz51] Ответ GQL: {'errors': [{'message': 'PersistedQueryNotFound'}], 'extensions': {'durationMilliseconds': 3, 'operationName': 'Current_user', 'requestID': '01K3MX2JWYY997154SJJWFPJYJ'}}
+2025-08-27 11:37:45 - INFO     - [psdpz51] GQL ошибка: PersistedQueryNotFound
+2025-08-27 11:37:45 - INFO     - [psdpz51] Не удалось получить user_id через GQL: PersistedQueryNotFound
+2025-08-27 11:37:45 - ERROR    - [psdpz51] Ошибка: Не удалось инициализировать сессию. Нет auth_token и не удалось получить user_id.
+Traceback (most recent call last):
+  File "C:\Users\Wolt\Desktop\TwitchFarmer\core.py", line 408, in _initialize_session
+    res = await self.gql_request(GQL_OPERATIONS["Current_user"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Wolt\Desktop\TwitchFarmer\core.py", line 468, in gql_request
+    raise GQLException(error_msg)
+core.GQLException: PersistedQueryNotFound
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Wolt\Desktop\TwitchFarmer\main.py", line 127, in main
+    await worker._initialize_session()
+  File "C:\Users\Wolt\Desktop\TwitchFarmer\core.py", line 415, in _initialize_session
+    raise MinerException(f"Не удалось инициализировать сессию. Нет auth_token и не удалось получить user_id.")
+core.MinerException: Не удалось инициализировать сессию. Нет auth_token и не удалось получить user_id.
+2025-08-27 11:37:45 - INFO     - [psdpz51] Работник остановлен.
