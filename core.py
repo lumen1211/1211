@@ -511,7 +511,7 @@ class AccountWorker:
             self.log(f"Получено {len(progress_data)} кампаний из Inventory")
             
             final_campaigns = []
-            for campaign in all_campaigns_
+            for campaign in all_campaigns_data:
                 campaign_id = campaign.get('id')
                 if campaign_id and campaign_id in progress_data:
                     self.log(f"Объединение данных для кампании {campaign_id}")
